@@ -24,7 +24,6 @@ import '@/permission' // permission control
  * please remove it before going online ! ! !
  */
 
-
 // set ElementUI lang to EN
 Vue.use(ElementUI, { locale })
 // 如果想要中文版 element-ui，按如下方式声明
