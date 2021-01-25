@@ -4,7 +4,7 @@ import { Message } from 'element-ui'
 const service = axios.create({
   // 当执行 npm run dev => .evn.development => /api => 跨域代理
   // 设置axios请求的基础的基础地址
-  baseURL: process.env.VUE.APP_BASE_API, // npm run dev => /api npm run bulid => /prod-api
+  baseURL: process.env.VUE_APP_BASE_API, // npm run dev => /api npm run bulid => /prod-api
   timeout: 5000 // 设置超时时间
 }) // 创建一个axios的实例
 service.interceptors.request.use() // 请求拦截器

@@ -7,7 +7,7 @@ export function login(data) {
   // 返回一个 promise 对象
   return request({
     url: '/sys/login',
-    method: 'POST',
+    method: 'post',
     data
   })
 }
