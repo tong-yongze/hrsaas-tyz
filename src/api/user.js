@@ -23,6 +23,17 @@ export function getUserInfo() {
   })
 }
 
+/** *
+ *
+ * 根据用户id 获取用户详情
+ * **/
+export function getUserDetailById(id) {
+  return request({
+    url: `/sys/user/${id}`
+    // axios 默认请求类型是get  可以省略不写
+  })
+}
+
 export function logout() {
 
 }
