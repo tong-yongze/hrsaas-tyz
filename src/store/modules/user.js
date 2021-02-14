@@ -39,6 +39,13 @@ const actions = {
     const baseInfo = await getUserDetailById(result.userId)
     context.commit('setUserInfo', { ...result, ...baseInfo }) // 提交到 mutations
     return result // 这里为什么要返回 为后期做权限留下伏笔
+  },
+  // 登出操作
+  logout(context) {
+  // 删除token
+    context.commit('removeToken')
+    // 清空用户资料
+    context.commit('removeUserInfo')
   }
 }
 
