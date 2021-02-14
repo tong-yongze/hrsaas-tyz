@@ -33,8 +33,9 @@ const actions = {
   },
   // 获取用户资料action
   async getUserInfo(context) {
+    // 用户的基本资料
     const result = await getUserInfo() // 获取返回值
-    // 获取用户的详情   用户的详情数据
+    // 获取用户详情  用户的详情数据
     const baseInfo = await getUserDetailById(result.userId)
     context.commit('setUserInfo', { ...result, ...baseInfo }) // 提交到 mutations
     return result // 这里为什么要返回 为后期做权限留下伏笔
