@@ -31,6 +31,7 @@
 </template>
 
 <script>
+import { delDepartments } from '@/api/departments'
 
 export default {
   props: {
@@ -52,7 +53,14 @@ export default {
         // 编辑部门
       } else {
         // 删除部门
-        alert('删除')
+        this.$confirm('您确定删除该组织部门吗？').then(() => {
+          // alert('用户点击了删除')
+          return delDepartments(this.treeNode.id)
+        }).then(() => {
+          // 只需要等到成功的时候 调用接口删除了 后端数据变化了 但是前端没有变  重新获取
+          this.$emit('delDepts') // 触发自定义事件
+          this.$message.success('删除部门成功')
+        })
       }
     }
   }

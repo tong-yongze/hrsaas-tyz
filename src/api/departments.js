@@ -13,7 +13,7 @@ export function getDepartments() {
 /**
  * 删除组织架构的数据
  * **/
-export function delDepartment(id) {
+export function delDepartments(id) {
   return request({
     url: ` /company/department/${id}`,
     method: 'Delete'

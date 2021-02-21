@@ -6,7 +6,7 @@
         <tree-tools :tree-node="company" :is-toot="true" />
         <!-- 放置一个el-tree  -->
         <el-tree :data="departs" :props="defaultProps" :default-expand-all="true">
-          <tree-tools slot-scope="{ data }" :tree-node="data" />
+          <tree-tools slot-scope="{ data }" :tree-node="data" @delDepts="getDepartments" />
         </el-tree>
       </el-card>
     </div>
