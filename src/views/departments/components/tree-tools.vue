@@ -31,6 +31,7 @@
 </template>
 
 <script>
+
 export default {
   props: {
     //   定义一个props属性
