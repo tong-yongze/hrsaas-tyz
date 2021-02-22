@@ -19,3 +19,12 @@ export function delDepartments(id) {
     method: 'Delete'
   })
 }
+/**
+ * 增加组织架构的数据
+ * **/
+export function addDepartments(data) {
+  return request({
+    url: '/company/department',
+    data
+  })
+}
