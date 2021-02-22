@@ -26,14 +26,35 @@
 </template>
 
 <script>
+import { getDepartments } from '@/api/departments'
+
 export default {
   props: {
     showDialog: {
       type: Boolean,
       default: false
+    },
+    treeNode: {
+      type: Object,
+      default: null
     }
   },
   data() {
+    // 检查部门名称是否重复
+    const checkNameRepeat = async(rule, value, callback) => {
+      // value 是部门名称 要去和同级部门下的部门对比  有没有相同的  不相同 可以过
+      const { depts } = await getDepartments()
+      // 去找同级部门下 有没有和value相同的数据
+      // 先找到同级部门的所有的子部门  然后找有没有等于 value的  如果返回一个true 说明
+      const isRepeat = depts.filter(item => item.pid === this.treeNode.id).some(item => item.name === value)
+      // 如果 isRepeat 为true 表示找到了一样的名字
+      isRepeat ? callback(new Error(`同级部门下已经存在这个${value}部门了`)) : callback()
+    }
+    const checkCodeRepeat = async(rule, value, callback) => {
+      const { depts } = await getDepartments()
+      const isRepeat = depts.some(item => item.code === value && value)
+      isRepeat ? callback(new Error(`组织架构下下已经存在这个${value}编码了`)) : callback()
+    }
     return {
       formData: {
         name: '', // 部门名称
@@ -44,9 +65,15 @@ export default {
       // 定义校验规则
       rules: {
         name: [{ required: true, message: '部门名称不能为空', trigger: 'blur' },
-          { min: 1, max: 50, message: '部门名称要求1-50个字符', trigger: 'blur' }],
+          { min: 1, max: 50, message: '部门名称要求1-50个字符', trigger: 'blur' },
+          {
+            trigger: 'blur',
+            validator: checkNameRepeat
+          }],
         code: [{ required: true, message: '部门编码不能为空', trigger: 'blur' },
-          { min: 1, max: 50, message: '部门编码要求1-50个字符', trigger: 'blur' }],
+          { min: 1, max: 50, message: '部门编码要求1-50个字符', trigger: 'blur' }, {
+            trigger: 'blur', validator: checkCodeRepeat
+          }],
         manager: [{ required: true, message: '部门负责人不能为空', trigger: 'blur' }],
         introduce: [{ required: true, message: '部门介绍不能为空', trigger: 'blur' },
           { trigger: 'blur', min: 1, max: 300, message: '部门介绍要求1-50个字符' }]
