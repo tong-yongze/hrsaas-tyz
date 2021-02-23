@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { getDepartments, addDepartments, getDepartDetail } from '@/api/departments'
+import { getDepartments, addDepartments, getDepartDetail, updateDepartments } from '@/api/departments'
 import { getEmployeeSimple } from '@/api/employees'
 
 export default {
@@ -48,8 +48,18 @@ export default {
       // value 是部门名称 要去和同级部门下的部门对比  有没有相同的  不相同 可以过
       const { depts } = await getDepartments()
       // 去找同级部门下 有没有和value相同的数据
-      // 先找到同级部门的所有的子部门  然后找有没有等于 value的  如果返回一个true 说明
-      const isRepeat = depts.filter(item => item.pid === this.treeNode.id).some(item => item.name === value)
+      let isRepeat = false
+      if (this.formData.id) {
+        // 有id就是编辑模式
+        // 编辑的数据 再数据库里有！！！ 同级部门下 我的名字不能和其他同级部门的名字进行重复
+        // 首先要找到我的同级部门 this.formData.id  就是我当前的id 我的pid 是this.formData.pid
+        // 先找到同级部门的所有的子部门  然后找有没有等于 value的  如果返回一个true 说明
+        isRepeat = depts.filter(item => item.pid === this.treeNode.pid && item.id !== this.treeNode.id).some(item => item.name === value)
+      } else {
+        // 没 id就是新增模式
+        isRepeat = depts.filter(item => item.pid === this.treeNode.id).some(item => item.name === value)
+      }
+
       // 如果 isRepeat 为true 表示找到了一样的名字
       isRepeat ? callback(new Error(`同级部门下已经存在这个${value}部门了`)) : callback()
     }
@@ -85,7 +95,9 @@ export default {
     }
   },
   computed: {
+    // 动态显示标题
     showTitle() {
+      // 这个表单中 id 如果有 就显示  前面 否则就显示后面
       return this.formData.id ? '编辑部门' : '新增子部门'
     }
   },
@@ -101,8 +113,14 @@ export default {
       // 手动校验表单
       this.$refs.deptForm.validate(async isOK => {
         if (isOK) {
-          // 表单校验通过 这里将id设成了我的pid
-          await addDepartments({ ...this.formData, pid: this.treeNode.id })
+          // 要分清楚现在是编辑还是新增
+          if (this.formData.id) {
+            await updateDepartments(this.formData)
+          } else {
+            // 表单校验通过 这里将id设成了我的pid
+            await addDepartments({ ...this.formData, pid: this.treeNode.id })
+          }
+
           this.$emit('addDepts') // 告诉父组件
           this.$emit('update:showDialog', false)
         }
