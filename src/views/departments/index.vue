@@ -11,14 +11,16 @@
       </el-card>
     </div>
     <!-- 放置弹出层 -->
-    <add-dept :show-dialog="showDialog" :tree-node="node" />
+    <add-dept :show-dialog.sync="showDialog" :tree-node="node" @addDepts="getDepartments" />
   </div>
 </template>
 
 <script>
 import TreeTools from './components/tree-tools'
 import AddDept from './components/add-dept'
+
 import { getDepartments } from '@/api/departments'
+import { tranListToTreeData } from '@/utils'
 export default {
   components: {
     TreeTools,
@@ -43,7 +45,7 @@ export default {
     async getDepartments() {
       const result = await getDepartments()
       this.company = { name: result.companyName, manager: '负责人', id: '' }
-      this.departs = result.depts
+      this.departs = tranListToTreeData(result.depts, '') // 需要将其转化成树形结构
       console.log(result)
     },
     // 控制tree-tools 点击添加子部门的事件
