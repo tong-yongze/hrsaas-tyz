@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { getDepartments, addDepartments } from '@/api/departments'
+import { getDepartments, addDepartments, getDepartDetail } from '@/api/departments'
 import { getEmployeeSimple } from '@/api/employees'
 
 export default {
@@ -88,6 +88,10 @@ export default {
     async getEmployeeSimple() {
       this.peoples = await getEmployeeSimple()
     },
+    // 获取详情方法
+    async getDepartDetail(id) {
+      this.formData = await getDepartDetail(id)
+    },
     btnOK() {
       // 手动校验表单
       this.$refs.deptForm.validate(async isOK => {
@@ -95,7 +99,7 @@ export default {
           // 表单校验通过 这里将id设成了我的pid
           await addDepartments({ ...this.formData, pid: this.treeNode.id })
           this.$emit('addDepts') // 告诉父组件
-          this.$emit('update: showDialog', false)
+          this.$emit('update:showDialog', false)
         }
       })
     },

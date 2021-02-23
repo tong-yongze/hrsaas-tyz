@@ -15,8 +15,8 @@ export function getDepartments() {
  * **/
 export function delDepartments(id) {
   return request({
-    url: ` /company/department/${id}`,
-    method: 'Delete'
+    url: `/company/department/${id}`,
+    method: 'delete'
   })
 }
 /**
@@ -25,6 +25,15 @@ export function delDepartments(id) {
 export function addDepartments(data) {
   return request({
     url: '/company/department',
+    method: 'post',
     data
+  })
+}
+/**
+ * 获取部门详情
+ * **/
+export function getDepartDetail(id) {
+  return request({
+    url: `/company/department/${id}`
   })
 }
