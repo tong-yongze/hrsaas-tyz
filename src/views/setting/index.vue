@@ -9,11 +9,11 @@
             <el-row style="height: 60px">
               <el-button type="primary" icon="el-icon-plus" size="small">新增角色</el-button>
             </el-row>
-            <el-table border="">
-              <el-table-column label="序号" width="120px" />
-              <el-table-column label="名称" width="240px" />
-              <el-table-column label="描述" />
-              <el-table-column label="操作">
+            <el-table border="" :data="list">
+              <el-table-column type="index" align="center" label="序号" width="120px" />
+              <el-table-column prop="name" align="center" label="名称" width="240px" />
+              <el-table-column prop="description" align="center" label="描述" />
+              <el-table-column align="center" label="操作">
                 <el-button size="small" type="success">分配权限</el-button>
                 <el-button size="small" type="primary">编辑</el-button>
                 <el-button size="small" type="danger">删除</el-button>
@@ -23,7 +23,11 @@
             <!-- 放置分页组件 -->
             <el-row type="flex" justify="center" align="middle" style="height: 60px">
               <el-pagination
+                :current-page="page.page"
+                :total="page.total"
+                :page-size="page.pagesize"
                 layout="prev, pager, next"
+                @current-change="changePage"
               />
             </el-row>
           </el-tab-pane>
@@ -52,8 +56,34 @@
 </template>
 
 <script>
-export default {
+import { getRoleList } from '@/api/setting'
 
+export default {
+  data() {
+    return {
+      list: [], // 承接数组
+      page: {
+        // 放置页码等数据
+        page: 1,
+        pagesize: 10,
+        total: 0
+      }
+    }
+  },
+  created() {
+    this.getRoleList() // 获取角色列表
+  },
+  methods: {
+    async getRoleList() {
+      const { total, rows } = await getRoleList(this.page)
+      this.page.total = total
+      this.list = rows
+    },
+    changePage(newPage) {
+      this.page.page = newPage
+      this.getRoleList()
+    }
+  }
 }
 </script>
 
