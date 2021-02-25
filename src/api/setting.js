@@ -15,7 +15,8 @@ export function getRoleList(params) {
  * **/
 export function getCompanyInfo(companyId) {
   return request({
-    url: `/company/${companyId}`
+    url: `/company/${companyId}`,
+    method: 'get'
   })
 }
 /** **
@@ -26,5 +27,34 @@ export function deleteRole(id) {
   return request({
     url: `/sys/role/${id}`,
     method: 'delete'
+  })
+}
+/** *
+ * 读取角色详情
+ * ***/
+export function getRoleDetail(id) {
+  return request({
+    url: `/sys/role/${id}`,
+    method: 'get'
+  })
+}
+/** *
+ * 修改角色
+ * ***/
+export function updateRole(data) {
+  return request({
+    url: `/sys/role/${data.id}`,
+    method: 'put',
+    data
+  })
+}
+/** *
+ * 新增角色
+ * ***/
+export function addRole(data) {
+  return request({
+    url: '/sys/role/',
+    method: 'post',
+    data
   })
 }

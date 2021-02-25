@@ -7,7 +7,7 @@
           <el-tab-pane label="角色管理">
             <!-- 左侧的内容 -->
             <el-row style="height: 60px">
-              <el-button type="primary" icon="el-icon-plus" size="small">新增角色</el-button>
+              <el-button type="primary" icon="el-icon-plus" size="small" @click="showDiglog=true">新增角色</el-button>
             </el-row>
             <el-table border="" :data="list">
               <el-table-column type="index" align="center" label="序号" width="120px" />
@@ -16,7 +16,7 @@
               <el-table-column align="center" label="操作">
                 <template slot-scope="{ row }">
                   <el-button size="small" type="success">分配权限</el-button>
-                  <el-button size="small" type="primary">编辑</el-button>
+                  <el-button size="small" type="primary" @click="editRole(row.id)">编辑</el-button>
                   <el-button size="small" type="danger" @click="deleteRole(row.id)">删除</el-button>
                 </template>
               </el-table-column>
@@ -58,11 +58,31 @@
         </el-tabs>
       </el-card>
     </div>
+
+    <!-- 放置一个弹层组件 -->
+    <el-dialog title="编辑部门" :visible="showDiglog" @close="btnCancel">
+      <el-form ref="roleForm" :model="roleForm" :rules="rules" label-width="120px">
+        <el-form-item prop="name" label="角色名称">
+          <el-input v-model="roleForm.name" />
+        </el-form-item>
+        <el-form-item label="角色描述">
+          <el-input v-model="roleForm.description" />
+        </el-form-item>
+      </el-form>
+
+      <!-- 放置footer插槽 -->
+      <el-row type="flex" justify="center">
+        <el-col :span="8">
+          <el-button size="small" @click="btnCancel">取消</el-button>
+          <el-button type="primary" size="small" @click="btnOK">确定</el-button>
+        </el-col>
+      </el-row>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getRoleList, getCompanyInfo, deleteRole } from '@/api/setting'
+import { getRoleList, getCompanyInfo, deleteRole, getRoleDetail, updateRole, addRole } from '@/api/setting'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -77,6 +97,19 @@ export default {
       },
       formData: {
         // 公司信息
+        name: '',
+        companyAddress: '',
+        companyPhone: '',
+        mailbox: '',
+        remarks: ''
+      },
+      showDiglog: false, // 控制弹层显示
+      roleForm: {
+        name: '',
+        description: ''
+      },
+      rules: {
+        name: [{ required: true, message: '角色名称不能为空!', trigger: 'blur' }]
       }
     }
   },
@@ -95,6 +128,7 @@ export default {
     },
     async getCompanyInfo() {
       this.formData = await getCompanyInfo(this.companyId)
+      console.log(this.formData)
     },
     async deleteRole(id) {
       //  提示
@@ -108,9 +142,41 @@ export default {
         console.log(error)
       }
     },
+    // 编辑按钮
+    async editRole(id) {
+      this.roleForm = await getRoleDetail(id)
+      this.showDiglog = true
+    },
     changePage(newPage) {
       this.page.page = newPage
       this.getRoleList()
+    },
+    async btnOK() {
+      try {
+        await this.$refs.roleForm.validate()
+        if (this.roleForm.id) {
+          await updateRole(this.roleForm)
+        } else {
+          // 新增业务
+          await addRole(this.roleForm)
+        }
+        // 重新拉取数据
+        this.getRoleList()
+        this.$message.success('操作成功！')
+        this.showDiglog = false
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    btnCancel() {
+      console.log('触发了')
+      this.roleForm = {
+        name: '',
+        description: ''
+      }
+      // 移除校验
+      this.$refs.roleForm.resetFields()
+      this.showDiglog = false
     }
   }
 }
