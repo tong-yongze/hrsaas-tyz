@@ -14,6 +14,9 @@ import router from './router'
 
 import * as directives from '@/directives'
 
+import Component from '@/components'
+Vue.use(Component) // 注册自己的插件
+
 import '@/icons' // icon
 import '@/permission' // permission control
 
