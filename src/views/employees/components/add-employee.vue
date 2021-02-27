@@ -121,6 +121,7 @@ export default {
         this.$parent.getEmployeeList() && this.$parent.getEmployeeList() // 直接调用父组件更新的方法
         // console.log('成功')
         this.$parent.showDialog = false
+        // 这里不用写弹层 因为 关闭弹层触发了 close 事件  close绑定了btnCancel 方法
       } catch (error) {
         console.log(error)
       }
@@ -136,7 +137,8 @@ export default {
         correctionTime: ''
       }
       this.$refs.addEmployee.resetFields() // 重置校验结果
-      this.$emit('update:showDialog', false)
+      // this.$parent.showDialog = false
+      this.$emit('update:showDialog', false) // update:props名称 这样写可以在父组件 直接用sync 修饰符处理
     }
 
   }
