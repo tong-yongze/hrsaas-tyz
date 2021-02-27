@@ -18,6 +18,7 @@ router.beforeEach(async(to, from, next) => {
     // 只有有token 情况下 才能获取资料
     // 如果有 token
     if (to.path === '/login') {
+      // 如果 有token 并且要求login 是没有必要的
       // 如果要访问的是 登录页
       next('/') // 跳到主页
     } else {
