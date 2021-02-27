@@ -1,7 +1,7 @@
 <template>
-  <el-dialog title="新增员工" :visible="showDialog">
+  <el-dialog title="新增员工" :visible="showDialog" @close="btnCancel">
     <!-- 表单 -->
-    <el-form :model="formData" :rules="rules" label-width="120px">
+    <el-form ref="addEmployee" :model="formData" :rules="rules" label-width="120px">
       <el-form-item label="姓名" prop="username">
         <el-input v-model="formData.username" style="width:50%" placeholder="请输入姓名" />
       </el-form-item>
@@ -39,8 +39,8 @@
     <template v-slot:footer>
       <el-row type="flex" justify="center">
         <el-col :span="6">
-          <el-button size="small">取消</el-button>
-          <el-button type="primary" size="small">确定</el-button>
+          <el-button size="small" @click="btnCancel">取消</el-button>
+          <el-button type="primary" size="small" @click="btnOK">确定</el-button>
         </el-col>
       </el-row>
     </template>
@@ -52,6 +52,8 @@
 import { getDepartments } from '@/api/departments'
 import { tranListToTreeData } from '@/utils'
 import EmployeeEnum from '@/api/constant/employees'
+import { addEmployee } from '@/api/employees'
+
 export default {
   props: {
     showDialog: {
@@ -107,7 +109,36 @@ export default {
       // console.log(node.name)
       this.formData.departmentName = node.name
       this.showTree = false
+    },
+    async btnOK() {
+      try {
+        await this.$refs.addEmployee.validate()
+        await addEmployee(this.formData) // 调用新增接口
+        // 通知父组件 更新数据
+        // this.$parent 父组件的实例
+        // 判断一下父组件有没有这个方法
+        console.log(this.$parent)
+        this.$parent.getEmployeeList() && this.$parent.getEmployeeList() // 直接调用父组件更新的方法
+        // console.log('成功')
+        this.$parent.showDialog = false
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    btnCancel() {
+      this.formData = {
+        username: '',
+        mobile: '',
+        formOfEmployment: '',
+        workNumber: '',
+        departmentName: '',
+        timeOfEntry: '',
+        correctionTime: ''
+      }
+      this.$refs.addEmployee.resetFields() // 重置校验结果
+      this.$emit('update:showDialog', false)
     }
+
   }
 }
 </script>
