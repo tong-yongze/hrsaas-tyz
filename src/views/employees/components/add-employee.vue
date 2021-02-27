@@ -12,7 +12,9 @@
         <el-date-picker v-model="formData.timeOfEntry" style="width:50%" placeholder="请选择入职时间" />
       </el-form-item>
       <el-form-item prop="formOfEmployment" label="聘用形式">
-        <el-select v-model="formData.formOfEmployment" style="width:50%" placeholder="请选择" />
+        <el-select v-model="formData.formOfEmployment" style="width:50%" placeholder="请选择">
+          <el-option v-for="item in EmployeeEnum.hireType" :key="item.id" :label="item.value" :value="item.id" />
+        </el-select>
       </el-form-item>
       <el-form-item prop="workNumber" label="工号">
         <el-input v-model="formData.workNumber" style="width:50%" placeholder="请输入工号" />
@@ -20,7 +22,14 @@
       <el-form-item prop="departmentName" label="部门">
         <el-input v-model="formData.departmentName" style="width:50%" placeholder="请选择部门" @focus="getDepartments" />
         <!-- 放置一个树形组件 -->
-        <el-tree v-loading="showTree" :data="treeData" :props="{label: 'name'}" :default-expand-all="true" />
+        <el-tree
+          v-if="showTree"
+          v-loading="loading"
+          :data="treeData"
+          :props="{label: 'name'}"
+          :default-expand-all="true"
+          @node-click="selectNode"
+        />
       </el-form-item>
       <el-form-item prop="correctionTime" label="转正时间">
         <el-date-picker v-model="formData.correctionTime" style="width:50%" placeholder="请选择转正时间" />
@@ -42,6 +51,7 @@
 <script>
 import { getDepartments } from '@/api/departments'
 import { tranListToTreeData } from '@/utils'
+import EmployeeEnum from '@/api/constant/employees'
 export default {
   props: {
     showDialog: {
@@ -51,6 +61,8 @@ export default {
   },
   data() {
     return {
+      // 定义表单数据
+      EmployeeEnum: EmployeeEnum,
       value: '',
       formData: {
         username: '',
@@ -70,21 +82,30 @@ export default {
         }],
         formOfEmployment: [{ required: true, message: '聘用形式不能为空', trigger: 'blur' }],
         workNumber: [{ required: true, message: '工号不能为空', trigger: 'blur' }],
+        // 这里设置为change 是不想离开焦点就校验
         departmentName: [{ required: true, message: '部门不能为空', trigger: 'change' }],
         timeOfEntry: [{ required: true, message: '入职时间', trigger: 'blur' }]
 
       },
       // 定义一个数组接收 树形结构
       treeData: [],
-      showTree: false
+      showTree: false, // 默认不显示树形组件
+      loading: false // 加上进度条
     }
   },
   methods: {
     async getDepartments() {
       this.showTree = true
+      this.loading = true
       const { depts } = await getDepartments()
       // depts 是一个数组 需要转化为树形结构 才可以被 el-tree显示
       this.treeData = tranListToTreeData(depts, '')
+      this.loading = false
+    },
+    // 点击部门时触发
+    selectNode(node) {
+      // console.log(node.name)
+      this.formData.departmentName = node.name
       this.showTree = false
     }
   }
