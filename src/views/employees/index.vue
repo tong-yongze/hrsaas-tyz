@@ -10,7 +10,7 @@
         <template v-slot:after>
           <el-button type="success" size="small">excel导入</el-button>
           <el-button type="danger" size="small">excel导出</el-button>
-          <el-button type="primary" size="small">新增员工</el-button>
+          <el-button type="primary" size="small" @click="showDialog = true">新增员工</el-button>
         </template>
       </page-tools>
       <!-- 表格组件 -->
@@ -51,7 +51,7 @@
     </div>
 
     <!-- 放置组件弹层 -->
-    <add-employee />
+    <add-employee :show-dialog.sync="showDialog" />
   </div>
 </template>
 
@@ -71,7 +71,8 @@ export default {
         size: 10,
         total: 0
       },
-      loading: false // 显示遮罩层
+      loading: false, // 显示遮罩层
+      showDialog: false
     }
   },
   created() {
