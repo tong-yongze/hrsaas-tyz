@@ -9,7 +9,7 @@
         <!-- 右侧显示按钮 excel导入 excel导出 新增员工 -->
         <template v-slot:after>
           <el-button type="success" size="small" @click="$router.push('/import')">excel导入</el-button>
-          <el-button type="danger" size="small">excel导出</el-button>
+          <el-button type="danger" size="small" @click="exportData">excel导出</el-button>
           <el-button type="primary" size="small" @click="showDialog = true">新增员工</el-button>
         </template>
       </page-tools>
@@ -105,7 +105,52 @@ export default {
       } catch (error) {
         console.log('失败')
       }
+    },
+    exportData() {
+      const headers = {
+        '手机号': 'mobile',
+        '姓名': 'username',
+        '入职日期': 'timeOfEntry',
+        '聘用形式': 'formOfEmployment',
+        '转正日期': 'correctionTime',
+        '工号': 'workNumber',
+        '部门': 'departmentName'
+      }
+      import('@/vendor/Export2Excel').then(async excel => {
+        // excel 是引入文件的导出对象
+        //  导出 header 从哪里来
+        // data 从哪里来
+        // 现在没有一个接口获取所有的数据
+        // 获取员工的接口 页码 每页条数
+        const { rows } = await getEmployeeList({ page: 1, size: this.page.total })
+        const data = this.formatJson(headers, rows) // 返回的data就是 要导出的数据
+        excel.export_json_to_excel({
+          header: Object.keys(headers),
+          data
+        })
+        // excel.export_json_to_excel({
+        //   header: ['姓名', '工资'],
+        //   data: [[]],
+        //   filename: '员工工资表'
+        // })
+        // 要转化 数据结构 还要和表头的顺序对应上
+        // 要求转出的标题是中文
+      })
+    },
+    // 将表头数据和数据进行对应
+    //  [{}]  [[]]
+    formatJson(headers, rows) {
+      return rows.map(item => {
+        // item  是一个对象 {mobile： 12345，username: "李四"}
+        // ["手机号"，"姓名"，"入职日期"]
+        return Object.keys(headers).map(key => {
+          return item[headers[key]]
+        })
+      })
+      // return rows.map(item => Object.keys(headers).map(key => item[headers[key]]))
+      // 需要处理时间格式问题
     }
+
   }
 }
 </script>
