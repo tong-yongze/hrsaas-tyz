@@ -160,12 +160,13 @@
 
 <script>
 import EmployeeEnum from '@/api/constant/employees'
+import { getEmployeeSimple, updateJob, getJobDetail } from '@/api/employees'
 
 export default {
   data() {
     return {
       userId: this.$route.params.id,
-      depts: [],
+      depts: [], // 员工列表
       EmployeeEnum,
       formData: {
         adjustmentAgedays: '', // 调整司龄天
@@ -195,6 +196,25 @@ export default {
         workingCity: '', // 工作城市
         workingTimeForTheFirstTime: '' // 首次参加工作时间
       }
+    }
+  },
+  created() {
+    this.getJobDetail()
+    this.getEmployeeSimple()
+  },
+  methods: {
+    // 获取用户的岗位信息
+    async getJobDetail() {
+      this.formData = await getJobDetail(this.userId)
+    },
+    // 获取员工简单列表
+    async getEmployeeSimple() {
+      this.depts = await getEmployeeSimple(this.userId)
+    },
+    // 点击保存更新 岗位信息
+    async saveJob() {
+      await updateJob(this.formData)
+      this.$message.success('保存岗位信息成功')
     }
   }
 }
