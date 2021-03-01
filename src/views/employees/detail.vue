@@ -27,6 +27,7 @@
           </el-tab-pane>
           <el-tab-pane label="岗位信息">
             <!-- 放置内容 -->
+            <component :is="JobComponent" />
           </el-tab-pane>
         </el-tabs>
       </el-card>
@@ -35,16 +36,18 @@
 </template>
 
 <script>
-import UserInfo from '@/views/employees/components/user-info'
+import UserInfo from './components/user-info'
+import JobInfo from './components/job-info'
 import { getUserDetailById } from '@/api/user'
 import { saveUserDetailById } from '@/api/employees'
 export default {
   components: {
-    UserInfo
+    UserInfo, JobInfo
   },
   data() {
     return {
       UserComponent: 'UserInfo',
+      JobComponent: 'JobInfo',
       userId: this.$route.params.id, // 直接将路由中的参数赋值给 data中的属性
       userInfo: {
         userInfo: '',
