@@ -8,7 +8,9 @@
       :limit="1"
       action="#"
       :on-preview="preview"
+      :before-upload="beforeUpload"
       :file-list="fileList"
+      :http-request="upload"
       :class="{disabled : fileComputed}"
       :on-remove="handleRemove"
     >
@@ -22,6 +24,12 @@
 </template>
 
 <script>
+import COS from 'cos-js-sdk-v5' // 引入腾讯云的包
+// 实例化COS 对象
+const cos = new COS({
+  SecretId: 'AKIDfFfqlfu9bu2vZw6gW7RkocAUWbbMGAvK', // 身份识别 ID
+  SecretKey: 'Yt9CzB7e1KRZjolYTEnoY7V19Wnuszzp' // 身份密钥
+})
 export default {
   data() {
     return {
@@ -64,6 +72,43 @@ export default {
       this.fileList = fileList.map(item => item)
       // 这里为何暂时不成功呢 ？  因为现在还没有上传所以第二次进来的数据  一定是个空的
       // 如果完成上传动作了 第一次进入和第二次进去的fileList 的长度应该是1 应该都有数据
+      // 上传成功 =>  数据才能进来 => 腾讯云cos
+    },
+    beforeUpload(file) {
+      console.log(file)
+      // 先检查文件类型
+      const types = ['image/jpeg', 'image/gif', 'image/bmp', 'image/png']
+      if (!types.some(item => item === file.type)) {
+        // 如果不存在
+        this.$message.error('上传图片只能是 JPG、GIF、BMP、PNG 格式!')
+        return false // 上传终止
+      }
+      // 检查文件大小  5M
+      const maxSize = 5 * 1024 * 1024
+      if (file.size > maxSize) {
+        //   超过了限制的文件大小
+        this.$message.error('上传的图片大小不能大于5M')
+        return false
+      }
+      return true // 最后一定要return  true
+    },
+    // 进行上传操作
+    upload(params) {
+      // console.log(params.file)
+      if (params.file) {
+        // 执行上传操作
+        cos.putObject({
+          Bucket: 'hrsaas-1305102544', // 存储桶
+          Region: 'ap-nanjing', // 地域
+          Key: params.file.name, // 文件名
+          Body: params.file, // 要上传的文件对象
+          SorageClass: 'STANDARD' // 上传的模式类型 直接默认 标准模式
+          // 上传到腾旭云 =》 哪个存储桶  哪个地域地存储桶
+        }, function(err, data) {
+          // data 返回数据之后  应该如何处理
+          console.log(err || data)
+        })
+      }
     }
   }
 }
