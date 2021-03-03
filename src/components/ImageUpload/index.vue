@@ -10,12 +10,14 @@
       :on-preview="preview"
       :before-upload="beforeUpload"
       :file-list="fileList"
+      :on-change="changeFile"
       :http-request="upload"
-      :class="{disabled : fileComputed}"
+      :class="{disabled: fileComputed }"
       :on-remove="handleRemove"
     >
       <i class="el-icon-plus" />
     </el-upload>
+    <el-progress v-if="showPercent" :percentage="percent" style="width: 180px" />
     <el-dialog :visible.sync="showDialog" title="图片预览">
       <img :src="imgUrl" alt="" style="width: 100%">
     </el-dialog>
@@ -33,9 +35,12 @@ const cos = new COS({
 export default {
   data() {
     return {
-      fileList: [{ url: 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1091405991,859863778&fm=26&gp=0.jpg' }],
-      showDialog: false,
-      imgUrl: ''
+      fileList: [], // 图片地址设置为数组
+      showDialog: false, // 控制图片的显示或者隐藏
+      imgUrl: '',
+      currentFileUid: null, // 记录当前正在上传的Uid
+      percent: 0, // 记录当前的百分比
+      showPercent: false // 默认不显示进度条
     }
   },
   computed: {
@@ -47,25 +52,24 @@ export default {
   methods: {
     // 点击预览事件
     preview(file) {
-      console.log(file)
+      // console.log(file)
       this.imgUrl = file.url
       this.showDialog = true
     },
     // file 是要删除的文件
     // fileList 是删过之后的文件
-    handleRemove(file, fileList) {
+    handleRemove(file) {
       // console.log(file)
       // console.log(fileList)
       // console.log(this.fileList)
       // this.fileList = fileList
       // 将当前删除的文件排除在外
       this.fileList = this.fileList.filter(item => item.uid !== file.uid)
-      // 这里
     },
     // 不能用push 这个钩子会执行多次
     changeFile(file, fileList) {
-      // file 是当前的文件 fileList 是当前的最新数组 this.fileList
-      console.log(123)
+      // file 是当前的文件 fileList 是当前的最新数组 this.fileList 中 fileList =》 upload组件 就会根据fileList 的变化而去渲染
+      // console.log(123)
       //   console.log(file)
       //   console.log(fileList)
       // 如果当前fileList 没有该文件的话
@@ -75,7 +79,7 @@ export default {
       // 上传成功 =>  数据才能进来 => 腾讯云cos
     },
     beforeUpload(file) {
-      console.log(file)
+      // console.log(file)
       // 先检查文件类型
       const types = ['image/jpeg', 'image/gif', 'image/bmp', 'image/png']
       if (!types.some(item => item === file.type)) {
@@ -84,12 +88,16 @@ export default {
         return false // 上传终止
       }
       // 检查文件大小  5M
-      const maxSize = 5 * 1024 * 1024
+      const maxSize = 10 * 1024 * 1024
       if (file.size > maxSize) {
         //   超过了限制的文件大小
         this.$message.error('上传的图片大小不能大于5M')
         return false
       }
+      // 已经确定当前上传的就是当前的这个file了
+      // console.log(file)
+      this.currentFileUid = file.uid
+      this.showPercent = true
       return true // 最后一定要return  true
     },
     // 进行上传操作
@@ -98,15 +106,43 @@ export default {
       if (params.file) {
         // 执行上传操作
         cos.putObject({
+          // 配置
           Bucket: 'hrsaas-1305102544', // 存储桶
           Region: 'ap-nanjing', // 地域
           Key: params.file.name, // 文件名
           Body: params.file, // 要上传的文件对象
-          SorageClass: 'STANDARD' // 上传的模式类型 直接默认 标准模式
+          StorageClass: 'STANDARD', // 上传的模式类型 直接默认 标准模式
+          onProgress: (params) => {
+            console.log(params)
+            this.percent = params.percent * 100
+          }
           // 上传到腾旭云 =》 哪个存储桶  哪个地域地存储桶
-        }, function(err, data) {
+        }, (err, data) => {
           // data 返回数据之后  应该如何处理
-          console.log(err || data)
+          // console.log(err || data)
+          // data 中有个 statusCode === 200 的时候说明上传成功
+          if (!err && data.statusCode === 200) {
+            // 此时说明文件上传成功  要获取成功的返回地址
+            // fileList 才能显示到上传组件上 此时我们要将fileList 中的数据的url地址变成 现在上传成功的地址
+            // fileList 是一个数组
+            // 需要知道当前上传成功的是哪一张图片
+            this.fileList = this.fileList.map(item => {
+              // 取找谁的 uid 等于刚刚记录下来的 id
+              if (item.uid === this.currentFileUid) {
+                // 将成功的地址赋值给 原来地 url 属性
+                return { url: 'http://' + data.Location, upload: true }
+                // upload 为true 表示这张图片已经上传完毕 这个属性要为我们后期应用的时候做标记
+                // 保存 =》 图片有大有小 =》 上传速度有快又慢
+              }
+              return item
+            })
+            // 关闭进度条  重置百分比
+            setTimeout(() => {
+              this.showPercent = false
+              this.percent = 0
+            }, 1000)
+            // 将上传成功的地址  回写到了fileList 中  fileList 变化 =》upload组件 就会根据fileList的变化而去渲染视图
+          }
         })
       }
     }
