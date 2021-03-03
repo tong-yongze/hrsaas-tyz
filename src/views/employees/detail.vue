@@ -19,6 +19,13 @@
             </el-form>
           </el-tab-pane>
           <el-tab-pane label="个人详情">
+            <el-row type="flex" justify="end">
+              <el-tooltip content="打印个人基本信息">
+                <router-link :to="`/employees/print/${userId}?type=personal`">
+                  <i class="el-icon-printer" />
+                </router-link>
+              </el-tooltip>
+            </el-row>
             <!-- 放置内容 -->
             <!-- <user-info /> -->
             <!-- vuejs中 内置了一个组件 component  可以是任何组件-->
@@ -26,6 +33,13 @@
             <!-- 动态组件  可以切换组件  is必须是变量-->
           </el-tab-pane>
           <el-tab-pane label="岗位信息">
+            <el-row type="flex" justify="end">
+              <el-tooltip content="打印岗位信息">
+                <router-link :to="`/employees/print/${userId}?type=job`">
+                  <i class="el-icon-printer" />
+                </router-link>
+              </el-tooltip>
+            </el-row>
             <!-- 放置内容 -->
             <component :is="JobComponent" />
           </el-tab-pane>
@@ -40,6 +54,7 @@ import UserInfo from './components/user-info'
 import JobInfo from './components/job-info'
 import { getUserDetailById } from '@/api/user'
 import { saveUserDetailById } from '@/api/employees'
+
 export default {
   components: {
     UserInfo, JobInfo
