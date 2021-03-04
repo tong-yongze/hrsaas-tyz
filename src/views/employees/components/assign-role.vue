@@ -10,7 +10,7 @@
     <el-row slot="footer" type="flex" justify="center">
       <el-col :span="6">
         <el-button type="primary" size="small" @click="btnOK">确定</el-button>
-        <el-button size="small"@click="btnCancel">取消</el-button>
+        <el-button size="small" @click="btnCancel">取消</el-button>
       </el-col>
     </el-row>
   </el-dialog>
@@ -57,8 +57,13 @@ export default {
       await assignRoles({ id: this.userId, roleIds: this.roleIds })
       // 关闭弹层
       this.$emit('update:showRoleDialog', false)
+      // this.$parent.showRoleDialog = false
     },
-    btnCancel() {}
+    btnCancel() {
+      // 取消
+      this.roleIds = [] // 重置数组 将它还原成一个空对象
+      this.$emit('update: showRoleDialog', false)
+    }
   }
 }
 </script>
