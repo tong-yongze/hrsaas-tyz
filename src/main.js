@@ -14,7 +14,7 @@ import router from './router'
 
 import * as directives from '@/directives'
 import * as filters from '@/filters'
-
+import checkPermission from '@/mixin/checkPermission'
 import Component from '@/components'
 Vue.use(Component) // 注册自己的插件
 
@@ -29,6 +29,8 @@ import '@/permission' // permission control
  * Currently MockJs will be used in the production environment,
  * please remove it before going online ! ! !
  */
+// 全局混入检查对象
+Vue.mixin(checkPermission) // 表示所有的组件都拥有了一个检查的方法
 
 // set ElementUI lang to EN
 Vue.use(ElementUI, { locale })
